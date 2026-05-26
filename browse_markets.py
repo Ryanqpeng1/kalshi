@@ -10,7 +10,7 @@ from decimal import Decimal
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from config import ENVIRONMENT
+from config import ENVIRONMENT, API_KEY_ID, PRIVATE_KEY_PATH
 from lol import KalshiClient, KalshiConfig
 
 def format_price(price_str):
@@ -40,6 +40,8 @@ def main():
         
         config = KalshiConfig()
         config.ENVIRONMENT = ENVIRONMENT
+        config.API_KEY_ID = API_KEY_ID
+        config.PRIVATE_KEY_PATH = PRIVATE_KEY_PATH
         
         client = KalshiClient(config)
         markets = client.get_markets(
