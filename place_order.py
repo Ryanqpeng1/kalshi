@@ -27,7 +27,7 @@ def get_user_input_order():
     # Get market ticker
     ticker = input("Market ticker (e.g., KXHARRIS24-LSV): ").strip().upper()
     if not ticker:
-        print("❌ Market ticker is required")
+        print("Market ticker is required")
         sys.exit(1)
     
     # Get side
@@ -35,14 +35,14 @@ def get_user_input_order():
         side = input("Side (yes/no): ").strip().lower()
         if side in ['yes', 'no']:
             break
-        print("❌ Side must be 'yes' or 'no'")
+        print("Side must be 'yes' or 'no'")
     
     # Get action
     while True:
         action = input("Action (buy/sell): ").strip().lower()
         if action in ['buy', 'sell']:
             break
-        print("❌ Action must be 'buy' or 'sell'")
+        print("Action must be 'buy' or 'sell'")
     
     # Get count
     while True:
@@ -50,9 +50,9 @@ def get_user_input_order():
             count = int(input("Number of contracts: ").strip())
             if count > 0:
                 break
-            print("❌ Count must be greater than 0")
+            print("Count must be greater than 0")
         except ValueError:
-            print("❌ Count must be a number")
+            print("Count must be a number")
     
     # Get price
     while True:
@@ -60,9 +60,9 @@ def get_user_input_order():
             price = int(input("Price in cents (1-99): ").strip())
             if 1 <= price <= 99:
                 break
-            print("❌ Price must be between 1 and 99 cents")
+            print("Price must be between 1 and 99 cents")
         except ValueError:
-            print("❌ Price must be a number")
+            print("Price must be a number")
     
     return ticker, side, action, count, price
 
@@ -88,24 +88,24 @@ def parse_command_line_args():
         count = int(sys.argv[4])
         price = int(sys.argv[5])
     except ValueError:
-        print("❌ Count and price must be numbers")
+        print("Count and price must be numbers")
         sys.exit(1)
     
     # Validate
     if side not in ['yes', 'no']:
-        print("❌ Side must be 'yes' or 'no'")
+        print("Side must be 'yes' or 'no'")
         sys.exit(1)
     
     if action not in ['buy', 'sell']:
-        print("❌ Action must be 'buy' or 'sell'")
+        print("Action must be 'buy' or 'sell'")
         sys.exit(1)
     
     if count <= 0:
-        print("❌ Count must be greater than 0")
+        print("Count must be greater than 0")
         sys.exit(1)
     
     if not (1 <= price <= 99):
-        print("❌ Price must be between 1 and 99 cents")
+        print("Price must be between 1 and 99 cents")
         sys.exit(1)
     
     return ticker, side, action, count, price
@@ -119,7 +119,7 @@ def show_market_info(client, ticker):
         print(f"YES bid: ${market.get('yes_bid_dollars', 'N/A')}")
         print(f"NO bid:  ${market.get('no_bid_dollars', 'N/A')}")
     except Exception as e:
-        print(f"⚠️  Could not fetch market info: {e}")
+        print(f"Could not fetch market info: {e}")
 
 def main():
     # Parse arguments or get interactive input
@@ -134,13 +134,13 @@ def main():
     
     # Validate config
     if API_KEY_ID == 'your-api-key-id-here':
-        print("\n❌ ERROR: API credentials not configured")
+        print("\nERROR: API credentials not configured")
         print("\nRun setup first:")
         print("  python setup.py")
         sys.exit(1)
     
     if PRIVATE_KEY_PATH == 'path/to/your/kalshi-key.key':
-        print("\n❌ ERROR: Private key path not configured")
+        print("\nERROR: Private key path not configured")
         print("\nRun setup first:")
         print("  python setup.py")
         sys.exit(1)
@@ -157,10 +157,10 @@ def main():
         config.PRIVATE_KEY_PATH = PRIVATE_KEY_PATH
         
         client = KalshiClient(config)
-        print("✓ Connected")
+        print("Connected")
     
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
+        print(f"Connection failed: {e}")
         sys.exit(1)
     
     # Show market info
@@ -195,7 +195,7 @@ def main():
             price=price
         )
         
-        print_header("✓ Order Placed Successfully")
+        print_header("Order Placed Successfully")
         order_data = order.get('order', {})
         print(f"Order ID:       {order_data.get('order_id')}")
         print(f"Status:         {order_data.get('status')}")
@@ -205,7 +205,7 @@ def main():
         print(f"Price:          ${order_data.get('yes_price', 'N/A')/100:.2f}")
     
     except Exception as e:
-        print_header("❌ Order Failed")
+        print_header("Order Failed")
         print(f"Error: {e}")
         sys.exit(1)
 

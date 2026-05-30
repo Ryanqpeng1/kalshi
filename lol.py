@@ -160,17 +160,32 @@ class KalshiClient:
             raise
     
     def get_balance(self) -> Dict:
-        """Get account balance in cents"""
-        return self._make_request('GET', '/portfolio/balance')
+        """Get account balance"""
+        response = self._make_request('GET', '/portfolio/balance')
+        # Ensure balance_in_cents is set for compatibility
+        if 'balance_in_cents' not in response and 'balance' in response:
+            response['balance_in_cents'] = response['balance']
+        return response
     
     def get_markets(self, series_ticker: Optional[str] = None, 
-                   status: Optional[str] = None, limit: int = 100) -> List[Dict]:
-        """Get available markets"""
+                   status: Optional[str] = None, limit: int = 100,
+                   mve_filter: str = 'exclude') -> List[Dict]:
+        """
+        Get available markets
+        
+        Args:
+            series_ticker: Filter by series ticker (e.g., 'KXLOL')
+            status: Filter by status (e.g., 'open')
+            limit: Maximum number of markets to return
+            mve_filter: Filter multivariate events (combos): 'exclude' (default) for single outcome only, 'only' for combos only, or None for all
+        """
         params = []
         if series_ticker:
             params.append(f"series_ticker={series_ticker}")
         if status:
             params.append(f"status={status}")
+        if mve_filter:
+            params.append(f"mve_filter={mve_filter}")
         params.append(f"limit={limit}")
         
         path = '/markets?' + '&'.join(params) if params else '/markets'
@@ -254,9 +269,13 @@ class KalshiClient:
         return self._make_request('PUT', f'/portfolio/orders/{order_id}', data)
     
     def get_positions(self) -> List[Dict]:
-        """Get all positions"""
+        """Get all positions (both market and event positions)"""
         result = self._make_request('GET', '/portfolio/positions')
-        return result.get('positions', [])
+        # API returns positions under 'market_positions' and 'event_positions' keys
+        positions = []
+        positions.extend(result.get('market_positions', []))
+        positions.extend(result.get('event_positions', []))
+        return positions
 
 
 class KalshiWebSocketClient:

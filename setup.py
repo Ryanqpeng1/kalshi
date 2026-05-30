@@ -42,7 +42,7 @@ def main():
     api_key_id = get_input("Enter your API Key ID")
     
     if not api_key_id:
-        print("❌ API Key ID is required")
+        print("API Key ID is required")
         sys.exit(1)
     
     # Get private key path
@@ -53,14 +53,14 @@ def main():
         key_path = get_input("Enter path to your private key file")
         
         if not key_path:
-            print("❌ Private key path is required")
+            print("Private key path is required")
             continue
         
         if validate_file_path(key_path):
-            print(f"✓ Found: {key_path}")
+            print(f"Found: {key_path}")
             break
         else:
-            print(f"❌ File not found: {key_path}")
+            print(f"File not found: {key_path}")
             print("   Make sure the path is correct (absolute or relative)")
             continue
     
@@ -82,9 +82,9 @@ def main():
                 environment = "production"
                 break
         else:
-            print("❌ Invalid choice. Enter 1 or 2")
+            print("Invalid choice. Enter 1 or 2")
     
-    print(f"✓ Using {environment} environment")
+    print(f"Using {environment} environment")
     
     # Summary
     print_header("Configuration Summary")
@@ -123,7 +123,7 @@ def main():
         with open(config_path, 'w') as f:
             f.write(content)
         
-        print_header("✓ Configuration Saved")
+        print_header("Configuration Saved")
         print(f"Updated {config_path}")
         print("\nYou can now run:")
         print("  python place_order.py")
@@ -131,7 +131,7 @@ def main():
         print("  python browse_markets.py")
         
     except Exception as e:
-        print(f"❌ Failed to update config: {e}")
+        print(f"Failed to update config: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':

@@ -3,18 +3,24 @@ Configuration file for Kalshi trading bot
 Update the values below with your actual credentials
 """
 
-# ===========================================
-# API CREDENTIALS (UPDATE THESE)
-# ===========================================
 
-# Your API Key ID (from https://kalshi.com/account/profile)
-API_KEY_ID = '7d8fae7e-7793-4f4f-a38e-abf1b597cd85'
-
-# Path to your private key file (downloaded from Kalshi)
-PRIVATE_KEY_PATH = '/Users/ryanpeng/kalshi/kalshi/private_key.txt'
 
 # Environment: 'demo' for testing, 'production' for real trading
 ENVIRONMENT = 'demo'
+
+# ===========================================
+# API CREDENTIALS (UPDATE THESE)
+# =========================================== 
+
+# Your API Key ID (from https://kalshi.com/account/profile)
+if (ENVIRONMENT == 'production'):
+    API_KEY_ID = 'de9809c5-c190-4ad4-97b7-a01b101d80d1'
+    PRIVATE_KEY_PATH = '/Users/ryanpeng/kalshi/kalshi/private_key_prod.txt'
+else: 
+    API_KEY_ID = '7d8fae7e-7793-4f4f-a38e-abf1b597cd85'
+    PRIVATE_KEY_PATH = '/Users/ryanpeng/kalshi/kalshi/private_key.txt'
+
+
 
 # ===========================================
 # ORDER DEFAULTS (Customize as needed)

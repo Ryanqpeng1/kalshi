@@ -13,7 +13,7 @@ from lol import KalshiClient, KalshiConfig
 
 def main():
     if API_KEY_ID == 'your-api-key-id-here':
-        print("❌ ERROR: API credentials not configured")
+        print("ERROR: API credentials not configured")
         print("Run: python setup.py")
         sys.exit(1)
     
@@ -34,7 +34,7 @@ def main():
         print(f"Balance: ${balance_dollars:,.2f}\n")
     
     except Exception as e:
-        print(f"❌ Error: {e}\n")
+        print(f"Error: {e}\n")
         sys.exit(1)
 
 if __name__ == '__main__':

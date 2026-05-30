@@ -43,14 +43,17 @@ def get_market_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.
     client = KalshiClient(config)
     
     try:
-        # Fetch all markets
-        markets = client.get_markets(limit=limit)
+        # Fetch all markets (mve_filter='exclude' removes combo markets)
+        markets = client.get_markets(limit=limit, mve_filter='exclude')
         
-        # Filter for volume > threshold
-        filtered_markets = [
-            m for m in markets 
-            if float(m.get('volume_fp', 0)) > volume_threshold
-        ]
+        # Filter for volume > threshold, unless running demo where all markets are shown
+        if ENVIRONMENT == 'demo':
+            filtered_markets = markets
+        else:
+            filtered_markets = [
+                m for m in markets 
+                if float(m.get('volume_fp', 0)) > volume_threshold
+            ]
         
         # Convert to DataFrame
         data = []
@@ -79,7 +82,6 @@ def get_market_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.
         
         df = pd.DataFrame(data)
         
-        # Sort by volume descending
         if not df.empty:
             df = df.sort_values('volume', ascending=False).reset_index(drop=True)
         
@@ -118,8 +120,8 @@ def get_lol_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.Dat
     client = KalshiClient(config)
     
     try:
-        # Fetch all markets
-        markets = client.get_markets(limit=limit)
+        # Fetch all markets (mve_filter='exclude' removes combo markets)
+        markets = client.get_markets(limit=limit, mve_filter='exclude')
         
         # Filter for LoL markets by ticker prefix (KXLOL is sports classification for League of Legends)
         lol_markets = [
@@ -127,11 +129,14 @@ def get_lol_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.Dat
             if m.get('ticker', '').startswith('KXLOL')
         ]
         
-        # Filter for volume > threshold
-        filtered_markets = [
-            m for m in lol_markets 
-            if float(m.get('volume_fp', 0)) > volume_threshold
-        ]
+        # Filter for volume > threshold, unless running demo where all markets are shown
+        if ENVIRONMENT == 'demo':
+            filtered_markets = lol_markets
+        else:
+            filtered_markets = [
+                m for m in lol_markets 
+                if float(m.get('volume_fp', 0)) > volume_threshold
+            ]
         
         # Convert to DataFrame
         data = []
@@ -160,7 +165,6 @@ def get_lol_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.Dat
         
         df = pd.DataFrame(data)
         
-        # Sort by volume descending
         if not df.empty:
             df = df.sort_values('volume', ascending=False).reset_index(drop=True)
         
@@ -204,8 +208,8 @@ def get_sport_positions(sport_ticker: str, volume_threshold: float = 0.0, limit:
     client = KalshiClient(config)
     
     try:
-        # Fetch all markets
-        markets = client.get_markets(limit=limit)
+        # Fetch all markets (mve_filter='exclude' removes combo markets)
+        markets = client.get_markets(limit=limit, mve_filter='exclude')
         
         # Filter for sport by ticker prefix
         sport_markets = [
@@ -213,11 +217,14 @@ def get_sport_positions(sport_ticker: str, volume_threshold: float = 0.0, limit:
             if m.get('ticker', '').startswith(sport_ticker)
         ]
         
-        # Filter for volume > threshold
-        filtered_markets = [
-            m for m in sport_markets 
-            if float(m.get('volume_fp', 0)) > volume_threshold
-        ]
+        # Filter for volume > threshold, unless running demo where all markets are shown
+        if ENVIRONMENT == 'demo':
+            filtered_markets = sport_markets
+        else:
+            filtered_markets = [
+                m for m in sport_markets 
+                if float(m.get('volume_fp', 0)) > volume_threshold
+            ]
         
         # Convert to DataFrame
         data = []
@@ -246,7 +253,6 @@ def get_sport_positions(sport_ticker: str, volume_threshold: float = 0.0, limit:
         
         df = pd.DataFrame(data)
         
-        # Sort by volume descending
         if not df.empty:
             df = df.sort_values('volume', ascending=False).reset_index(drop=True)
         
@@ -255,6 +261,76 @@ def get_sport_positions(sport_ticker: str, volume_threshold: float = 0.0, limit:
     except Exception as e:
         print(f"Error fetching {sport_ticker} markets: {e}")
         return pd.DataFrame()
+
+
+def filter_live_markets(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Filter markets DataFrame to only include live/in-progress games
+    
+    A market is considered "live" if:
+    - Market status is 'open' (accepting trades)
+    - No result has been determined yet (game is ongoing or hasn't started)
+    
+    Args:
+        df: DataFrame from get_market_positions(), get_lol_positions(), or get_sport_positions()
+    
+    Returns:
+        Filtered DataFrame containing only live markets
+    
+    Example:
+        >>> all_markets = get_market_positions(limit=200)
+        >>> live_only = filter_live_markets(all_markets)
+        >>> print(f"Live markets: {len(live_only)} out of {len(all_markets)}")
+    """
+    if df.empty:
+        return df
+    
+    # Filter for open markets with no result set (game is live/ongoing)
+    live = df[(df['status'] == 'open') & (df['result'].isna() | (df['result'] == ''))]
+    
+    return live.reset_index(drop=True)
+
+
+def get_live_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.DataFrame:
+    """
+    Get all live/in-progress markets with active trading
+    
+    Convenience function combining get_market_positions() and filter_live_markets()
+    
+    Args:
+        volume_threshold: Minimum volume to include (default 0.0)
+        limit: Maximum number of markets to fetch (default 100)
+    
+    Returns:
+        DataFrame with only live markets
+    
+    Example:
+        >>> live = get_live_positions(volume_threshold=1.0)
+        >>> print(f"Found {len(live)} live markets")
+    """
+    markets = get_market_positions(volume_threshold=volume_threshold, limit=limit)
+    return filter_live_markets(markets)
+
+
+def get_live_lol_positions(volume_threshold: float = 0.0, limit: int = 100) -> pd.DataFrame:
+    """
+    Get live League of Legends markets only
+    
+    Convenience function combining get_lol_positions() and filter_live_markets()
+    
+    Args:
+        volume_threshold: Minimum volume to include (default 0.0)
+        limit: Maximum number of markets to fetch (default 100)
+    
+    Returns:
+        DataFrame with live LoL markets only
+    
+    Example:
+        >>> live_lol = get_live_lol_positions(volume_threshold=0.5)
+        >>> print(live_lol[['ticker', 'title', 'volume']])
+    """
+    markets = get_lol_positions(volume_threshold=volume_threshold, limit=limit)
+    return filter_live_markets(markets)
 
 
 def get_active_markets(volume_threshold: float = 1.0) -> pd.DataFrame:
